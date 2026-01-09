@@ -1,0 +1,34 @@
+---
+name: Black Lint
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        description: Python version to use for python black check
+        type: string
+        default: '3.13'
+      image_name:
+        description: The Docker image to use for the black job
+        type: string
+        default: 'docker.io/python'
+
+jobs:
+  black:
+    runs-on: ubuntu
+    container:
+      image: ${{ inputs.image_name }}:${{ inputs.python_version }}
+    steps:
+
+      - name: Run Black
+        env:
+          PYTHON_VERSION: ${{ inputs.python_version }}
+        run: |
+          PIP_QUIET=1 pip install black
+          BLACK_TARGET_VERSION=$(echo "${PYTHON_VERSION}" | sed 's/\.//')
+          echo "🧪 Running python black --target-version py$BLACK_TARGET_VERSION"
+          black --target-version "py$BLACK_TARGET_VERSION" \
+            --check \
+            --diff \
+            --color \
+            .
